@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Socket.io Chat App</title>
+  </head>
+  <body>
+    <h1>Chat App</h1>
+    <div id="chat">
+      <div id="users">
+        <h2>Users</h2>
+        <ul id="user-list"></ul>
+      </div>
+      <div id="messages">
+        <h2>Messages</h2>
+        <ul id="message-list"></ul>
+      </div>
+    </div>
+    <input type="text" id="message-input" placeholder="Type your message" />
+    <button id="send-button">Send</button>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+
+      const messageInput = document.getElementById("message-input");
+      const sendButton = document.getElementById("send-button");
+      const userList = document.getElementById("user-list");
+      const messageList = document.getElementById("message-list");
+
+      sendButton.addEventListener("click", () => {
+        const message = messageInput.value;
+        if (message.trim() !== "") {
+          socket.emit("message", message);
+          messageInput.value = "";
+        }
+      });
+
+      socket.on("userJoined", (username) => {
+        const listItem = document.createElement("li");
+        listItem.textContent = `${username} joined the chat`;
+        userList.appendChild(listItem);
+      });
+
+      socket.on("userLeft", (username) => {
+        const listItem = document.createElement("li");
+        listItem.textContent = `${username} left the chat`;
+        userList.appendChild(listItem);
+      });
+
+      socket.on("updateUsers", (users) => {
+        userList.innerHTML = "";
+        users.forEach((user) => {
+          const listItem = document.createElement("li");
+          listItem.textContent = user;
+          userList.appendChild(listItem);
+        });
+      });
+
+      socket.on("message", (data) => {
+        const listItem = document.createElement("li");
+        listItem.textContent = `${data.username}: ${data.message}`;
+        messageList.appendChild(listItem);
+      });
+
+      const username = prompt("Enter your username:");
+      socket.emit("join", username);
+    </script>
+  </body>
+</html>

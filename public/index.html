@@ -2,27 +2,206 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Socket.io Chat App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Chat app</title>
+
+    <style>
+      /* Reset some default styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Define some basic styling for the chat container */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .chat-container {
+        display: flex;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        max-width: 800px;
+        width: 100%;
+        height: 600px;
+        overflow: hidden;
+      }
+
+      /* Sidebar styling */
+      .sidebar {
+        width: 250px;
+        background-color: #4267b2;
+        color: #fff;
+        overflow-y: auto;
+      }
+
+      .user-list {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      .user-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .user-item:hover {
+        background-color: #364b87;
+      }
+
+      .user-item.active {
+        background-color: #364b87;
+      }
+
+      .user-item img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+      }
+
+      .user-info {
+        flex: 1;
+      }
+
+      .user-info h3 {
+        font-size: 16px;
+        margin: 0;
+      }
+
+      /* Chat styling */
+      .chat {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chat-header {
+        background-color: #4267b2;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        padding: 10px;
+      }
+
+      .chat-header img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+      }
+
+      .chat-header h3 {
+        font-size: 16px;
+        margin: 0;
+      }
+
+      .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+      }
+
+      .chat-input {
+        display: flex;
+        padding: 10px;
+        border-top: 1px solid #e0e0e0;
+        background-color: #fff;
+      }
+
+      .chat-input textarea {
+        flex: 1;
+        border: none;
+        outline: none;
+        padding: 10px;
+        border-radius: 5px;
+        resize: none;
+      }
+
+      .chat-input button {
+        background-color: #4267b2;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        margin-left: 10px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .chat-input button:hover {
+        background-color: #364b87;
+      }
+
+      /* Responsive styling */
+      @media screen and (max-width: 768px) {
+        .chat-container {
+          flex-direction: column;
+          height: 100%;
+        }
+        .sidebar {
+          width: 100%;
+        }
+        .chat {
+          width: 100%;
+          height: 100%;
+        }
+      }
+    </style>
   </head>
   <body>
-    <h1>Chat App</h1>
-    <div id="chat">
-      <div id="users">
-        <h2>Users</h2>
-        <ul id="user-list"></ul>
+    <div class="chat-container">
+      <div class="sidebar">
+        <!-- Sidebar content, e.g., user list -->
+        <ul class="user-list" id="user-list">
+          <li class="user-item active">
+            <!-- <img src="profile1.jpg" alt="User 1" /> -->
+            <div class="user-info">
+              <h3>Luffy</h3>
+              <p>Last message...</p>
+            </div>
+          </li>
+          <li class="user-item">
+            <!-- <img src="profile2.jpg" alt="User 2" /> -->
+            <div class="user-info">
+              <h3>Zoro</h3>
+              <p>Last message...</p>
+            </div>
+          </li>
+          <!-- Add more user items as needed -->
+        </ul>
       </div>
-      <div id="messages">
-        <h2>Messages</h2>
-        <ul id="message-list"></ul>
+      <div class="chat">
+        <!-- Chat content -->
+        <div class="chat-header">
+          <!-- <img src="profile1.jpg" alt="User 1" /> -->
+          <h3>Luffy</h3>
+        </div>
+        <div class="chat-messages" id="message-list">
+          <!-- Messages will be added here -->
+        </div>
+        <div class="chat-input">
+          <textarea
+            placeholder="Type a message..."
+            id="message-input"
+          ></textarea>
+          <button id="send-button">Send</button>
+        </div>
       </div>
     </div>
-    <input type="text" id="message-input" placeholder="Type your message" />
-    <button id="send-button">Send</button>
-
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io();
-
       const messageInput = document.getElementById("message-input");
       const sendButton = document.getElementById("send-button");
       const userList = document.getElementById("user-list");
@@ -31,40 +210,33 @@
       sendButton.addEventListener("click", () => {
         const message = messageInput.value;
         if (message.trim() !== "") {
+          // Emit the message event to the server
           socket.emit("message", message);
           messageInput.value = "";
         }
       });
 
-      socket.on("userJoined", (username) => {
-        const listItem = document.createElement("li");
-        listItem.textContent = `${username} joined the chat`;
-        userList.appendChild(listItem);
-      });
-
-      socket.on("userLeft", (username) => {
-        const listItem = document.createElement("li");
-        listItem.textContent = `${username} left the chat`;
-        userList.appendChild(listItem);
-      });
-
-      socket.on("updateUsers", (users) => {
-        userList.innerHTML = "";
-        users.forEach((user) => {
-          const listItem = document.createElement("li");
-          listItem.textContent = user;
-          userList.appendChild(listItem);
-        });
-      });
-
       socket.on("message", (data) => {
         const listItem = document.createElement("li");
-        listItem.textContent = `${data.username}: ${data.message}`;
+        listItem.textContent = `${data.message}`;
         messageList.appendChild(listItem);
       });
 
-      const username = prompt("Enter your username:");
       socket.emit("join", username);
+
+      io.on("connection", (socket) => {
+        socket.on("join", (username) => {
+          io.emit("updateUsers", Object.values(connectedUsers));
+        });
+
+        socket.on("message", (message) => {
+          io.emit("message", { username: connectedUsers[socket.id], message });
+        });
+
+        socket.on("disconnect", () => {
+          // ...
+        });
+      });
     </script>
   </body>
 </html>

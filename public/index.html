@@ -219,6 +219,8 @@
         congratulations: "🎉",
       };
 
+      const randomNumber = Math.random() * 10;
+
       const socket = io();
       const messageInput = document.getElementById("message-input");
       const sendButton = document.getElementById("send-button");
@@ -250,6 +252,20 @@
           listItem.textContent = replacedMessage;
           messageList.appendChild(listItem);
         }
+
+        /* --------------OPTIONAL ASSIGNMENT----------------------- */
+        if (`${data.message}`.includes("/help")) {
+          console.log("/help");
+          /* listItem.textContent = `${data.message}`.replace("react", "⚛️");
+          messageList.appendChild(listItem); */
+          alert("hello");
+        } else if (`${data.message}`.includes("/clear")) {
+          messageList.innerHTML = "";
+        } else if (`${data.message}`.includes("/random")) {
+          listItem.textContent = "Here's your random number: " + randomNumber;
+          messageList.appendChild(listItem);
+        }
+        /* --------------OPTIONAL ASSIGNMENT----------------------- */
       });
 
       socket.emit("join", username);

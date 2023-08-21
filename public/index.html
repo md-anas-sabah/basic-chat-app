@@ -17,13 +17,22 @@
       /* Define some basic styling for the chat container */
       body {
         font-family: Arial, sans-serif;
-        background-color: #f0f0f0;
+        background-color: #fffefe;
+
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
       }
-
+      .chat-messages > li {
+        list-style-type: none;
+        border-radius: 30px;
+        margin-top: 20px;
+        padding: 10px;
+        background-color: rgb(248, 248, 248);
+        box-shadow: 1px 2px white;
+        color: black;
+      }
       .chat-container {
         display: flex;
         background-color: #fff;
@@ -167,8 +176,8 @@
           <li class="user-item active">
             <!-- <img src="profile1.jpg" alt="User 1" /> -->
             <div class="user-info">
-              <h3>Luffy</h3>
-              <p>Last message...</p>
+              <h3>Chat App</h3>
+              <!--<p>Last message...</p> -->
             </div>
           </li>
           <li class="user-item">
@@ -201,6 +210,15 @@
     </div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
+      let symbols = {
+        react: "⚛️",
+        woah: "😲",
+        hey: "👋",
+        lol: "😂",
+        love: "❤️",
+        congratulations: "🎉",
+      };
+
       const socket = io();
       const messageInput = document.getElementById("message-input");
       const sendButton = document.getElementById("send-button");
@@ -220,6 +238,18 @@
         const listItem = document.createElement("li");
         listItem.textContent = `${data.message}`;
         messageList.appendChild(listItem);
+
+        const regex = /\b(react|woah|hey|lol|love|congratulations)\b/g;
+        const replacedMessage = data.message.replace(
+          regex,
+          (match) => symbols[match]
+        );
+
+        if (replacedMessage !== data.message) {
+          console.log(replacedMessage);
+          listItem.textContent = replacedMessage;
+          messageList.appendChild(listItem);
+        }
       });
 
       socket.emit("join", username);

@@ -255,10 +255,11 @@
 
         /* --------------OPTIONAL ASSIGNMENT----------------------- */
         if (`${data.message}`.includes("/help")) {
-          console.log("/help");
-          /* listItem.textContent = `${data.message}`.replace("react", "⚛️");
-          messageList.appendChild(listItem); */
-          alert("hello");
+          alert(
+            "Available Commands: \n /help-show me this message \n /random-Print a random number \n /clear- Clear the chat"
+          );
+          listItem.textContent = "";
+          messageList.appendChild(listItem);
         } else if (`${data.message}`.includes("/clear")) {
           messageList.innerHTML = "";
         } else if (`${data.message}`.includes("/random")) {
